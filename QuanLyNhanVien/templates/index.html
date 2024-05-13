@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Phong cách cho input và button */
+    input[type="text"],
+    button {
+      padding: 8px;
+      margin: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Phong cách cho bảng */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    /* Phong cách cho caption */
+    caption {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    /* Phong cách cho table head */
+    thead {
+      background-color: #f2f2f2;
+    }
+
+    /* Phong cách cho table body */
+    tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tbody tr:hover {
+      background-color: #ddd;
+    }
+
+    caption {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const App = () => {
+      const [data, setData] = React.useState(null);
+      const [findNhanVien, setFindNhanVien] = React.useState(null);
+      const [searchInput, setSearchInput] = React.useState('');
+
+      const getBangNhanVienTinhLuong = () => {
+        fetch('http://127.0.0.1:8000/bangnhanvien/tinhluong')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            setData(data);
+          })
+          .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+          });
+      }
+
+      const getBangNhanVienChuaTinhLuong = () => {
+        fetch('http://127.0.0.1:8000/bangnhanvien/')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            setData(data);
+          })
+          .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+          });
+      }
+
+      const getNhanVien = () => {
+        fetch(`http://127.0.0.1:8000/bangnhanvien/tinhluong/${searchInput}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            setFindNhanVien(data);
+          })
+          .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+          });
+      }
+
+      const handleUpdateSalary = () => {
+        getBangNhanVienTinhLuong();
+      };
+
+      const handleSearch = () => {
+        getNhanVien();
+        console.log(findNhanVien);
+      }
+
+      const handleSearchInputChange = (e) => {
+        setSearchInput(e.target.value);
+        setFindNhanVien(null);
+      }
+
+      React.useEffect(() => {
+        getBangNhanVienChuaTinhLuong();
+      }, []);
+
+      return (
+        <div>
+          <div>
+            <input type="text" value={searchInput} onChange={(e) => handleSearchInputChange(e)} />
+            <button onClick={handleSearch}>Tìm kiếm</button>
+            <button onClick={handleUpdateSalary}>Cập nhật Lương</button>
+            <table>
+              <caption>Bảng nhân viên</caption>
+              <thead>
+                <tr>
+                  {data && Object.keys(data[0]).map(key => (
+                    <th key={key}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data && data.map((item, index) => (
+                  <tr key={index}>
+                    {Object.values(item).map((value, index) => (
+                      <td key={index}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <table>
+              <caption>Nhân viên cần tìm</caption>
+              <thead>
+                <tr>
+                  {findNhanVien && Object.keys(findNhanVien[0]).map(key => (
+                    <th key={key}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {findNhanVien && findNhanVien.map((item, index) => (
+                  <tr key={index}>
+                    {Object.values(item).map((value, index) => (
+                      <td key={index}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+
+</html>
